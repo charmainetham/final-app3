@@ -20,6 +20,7 @@ $(function() {
 
 
   // Prompt for setting a username
+  var users;
   var username;
   var connected = false;
   var typing = false;
@@ -42,17 +43,25 @@ $(function() {
   function setUsername () {
     username = cleanInput($usernameInput.val().trim());
 
+    // if (data.users.indexOf(username) == -1) {
+    //   // alert("retype your name!")
+    //   return console.log("hello");
+    // } else {
     // If the username is valid
-    if (username) {
-      // $testing2.hide();
-      $loginPage.fadeOut();
-      $pages.fadeIn();
-      $chatPage.show();
-      $loginPage.off('click');
-      $currentInput = $inputMessage.focus();
-      // Tell the server your username
-      socket.emit('add user', username);
-    }
+
+      // if (data.users.indexOF(username) == -1) {
+        if(username){
+        // $testing2.hide();
+        $loginPage.fadeOut();
+        $pages.fadeIn();
+        $chatPage.show();
+        $loginPage.off('click');
+        $currentInput = $inputMessage.focus();
+        // Tell the server your username
+        socket.emit('add user', username);
+      
+      };
+    // };
   }
 
   // Sends a chat message
@@ -225,6 +234,9 @@ $(function() {
         socket.emit('stop typing');
         typing = false;
       } else {
+        // socket.on('check', function(data){
+        //   setUsername(data);
+        // });
         setUsername();
       }
     }
@@ -296,6 +308,10 @@ $(function() {
   // log('123');
   onlineUsers(data);
   });
+
+  // socket.on('check'),function(data){
+  //   users = data.users
+  // };
 
 
 

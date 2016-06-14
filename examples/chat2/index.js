@@ -1,5 +1,6 @@
 // Setup basic express server
 var express = require('express');
+var mongoose = require('mongoose');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('../..')(server);
@@ -9,6 +10,24 @@ var users = [];
 server.listen(port, function () {
   console.log('Server listening at port %d', port);
 });
+
+
+// MongoDB
+mongoose.connect('mongodb://localhost/point', function(err){
+  if(err){
+    console.log(err);
+  } else {
+    console.log('Connection to mongodb');
+  };
+});
+
+var pointSchema = mongoose.Schema({
+  username: String, 
+  points: Number,
+  created: {type: Date, default: Date.now}
+});
+
+var Point = mongoose.model('Message',pointSchema);
 
 // Routing
 app.use(express.static(__dirname + '/public'));
@@ -20,13 +39,19 @@ var numUsers = 0;
 
 
 io.on('connection', function (socket) {
+  console.log(Point.find({}));
   var addedUser = false;
     console.log(socket.id)
+
+
+    socket.emit('check',{
+      users: users
+    });
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', function (data) {
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
+      socket.broadcast.emit('new message', {
       username: socket.username,
       message: data
     });
@@ -37,11 +62,17 @@ io.on('connection', function (socket) {
     if (addedUser) return;
 
     // we store the username in the socket session for this client
+
+
     socket.username = username;
     ++numUsers;
     addedUser = true;
     users.push(username);
 
+    var newPoint = new Point({username: username, points: 0});
+    newPoint.save(function(err){
+      if (err) throw err;
+    });
  
     socket.emit('login', {
       numUsers: numUsers
